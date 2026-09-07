@@ -201,14 +201,14 @@ export async function importProfile(profilesService: ProfilesService): Promise<v
               "workbench.extensions.installExtension",
               `${extension.id}@${extension.version}`,
             );
-    
+
             success++;
           } catch (error) {
             console.error(
               `Erro ao instalar ${extension.id}@${extension.version}`,
               error,
             );
-    
+
             failed++;
           } finally {
             progress.report({ increment: 100 / extensionsToInstall.length });

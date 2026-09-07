@@ -63,7 +63,7 @@ export async function exportProfile(profilesService: ProfilesService): Promise<v
   } catch (error) {
     console.error("Erro ao exportar perfil DevVault:", error);
     vscode.window.showErrorMessage(
-      "N\u00e3o foi poss\u00edvel exportar o perfil. Verifique o local escolhido e a permiss\u00e3o de escrita.",
+      "Não foi possível exportar o perfil. Verifique o local escolhido e a permissão de escrita.",
     );
   }
 }
