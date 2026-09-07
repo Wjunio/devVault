@@ -1,1 +1,7 @@
-.vscode/*
+.vscode/
+devvault/out/
+devvault/dist/
+devvault/node_modules/
+devvault/.vscode-test/
+devvault/*.vsix
+devvault/.vscode/
