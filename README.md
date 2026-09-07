@@ -22,10 +22,37 @@ Para depurar, abra o repositório no VS Code e execute a configuração **Run Ex
 Na pasta `devvault`, execute:
 
 ```sh
-npx @vscode/vsce package
+npm run package:vsix
 ```
 
 O comando executa a checagem de tipos, o lint e o build de produção antes de gerar o VSIX. `npm run package` executa apenas essas etapas de build.
+
+### Gerar uma nova versão
+
+Na pasta `devvault`, execute:
+
+```sh
+npm run release
+```
+
+O comando incrementa a versão de correção (`patch`) no `package.json` e no `package-lock.json` e gera o VSIX. Por exemplo, `0.0.1` passa para `0.0.2`, gerando `devvault-manager-0.0.2.vsix`. Nenhum commit ou tag Git é criado automaticamente.
+
+| Comando | Exemplo a partir de `0.0.1` | Quando usar |
+| --- | --- | --- |
+| `npm run release` ou `npm run release:patch` | `0.0.2` | Correções e ajustes de documentação. |
+| `npm run release:minor` | `0.1.0` | Novas funcionalidades. |
+| `npm run release:major` | `1.0.0` | Uma nova versão principal. |
+
+Atualize o `devvault/CHANGELOG.md` com as mudanças antes de gerar a versão. Se o empacotamento falhar, a versão já terá sido incrementada: corrija o problema e execute `npm run package:vsix` para tentar novamente com o mesmo número.
+
+Para disponibilizar a atualização aos usuários, envie o VSIX gerado pela opção de atualização da extensão no painel do publicador no Marketplace. Os scripts acima geram o arquivo localmente; a publicação é uma etapa separada.
+
+Para testar o pacote localmente no VS Code:
+
+1. Abra a Paleta de Comandos.
+2. Execute `Extensions: Install from VSIX...`.
+3. Selecione o arquivo gerado `devvault-manager-<versão>.vsix`.
+4. Procure por `DevVault` na Paleta de Comandos para começar.
 
 ## Ícone da extensão
 
