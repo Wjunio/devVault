@@ -89,6 +89,7 @@ function setup(data = document(), options = {}) {
       showInformationMessage: async (message, ...items) => {
         calls.messages.push(message);
         if (items.includes('Importar perfil')) return options.cancelImport ? undefined : 'Importar perfil';
+        if (items.includes('Importar favoritos')) return options.cancelImport ? undefined : 'Importar favoritos';
         if (items.includes('Instalar agora')) return options.later ? 'Fazer depois' : 'Instalar agora';
       },
       showWarningMessage: async (message, ...items) => {
@@ -110,6 +111,8 @@ function setup(data = document(), options = {}) {
     calls,
     runImport: () => loadModule('src/commands/importProfile.ts', vscode).importProfile(service),
     runExport: () => loadModule('src/commands/exportProfile.ts', vscode).exportProfile(service),
+    runImportFavorites: () => loadModule('src/commands/importFavorites.ts', vscode).importFavorites(service),
+    runExportFavorites: () => loadModule('src/commands/exportFavorites.ts', vscode).exportFavorites(service),
   };
 }
 
@@ -205,5 +208,76 @@ test('export respects cancelled dialogs and empty profile lists', async () => {
     await app.runExport();
     assert.equal(app.calls.writes.length, 0);
     assert.equal(app.calls.errors.length, 0);
+  }
+});
+
+const favoritesDocument = (extensions = []) => ({ version: 1, type: 'favorites', extensions });
+
+test('favorites export round trips through import', async () => {
+  const data = favoritesDocument([extension('a.b')]);
+  const app = setup(data, { profiles: data.extensions });
+  await app.runExportFavorites();
+  assert.deepEqual(app.calls.writes, [data]);
+  const imported = setup(data, { later: true, raw: '\uFEFF' + JSON.stringify(data) });
+  await imported.runImportFavorites();
+  assert.deepEqual(imported.calls.saves, [data.extensions]);
+});
+
+test('favorites merge preserves highest versions and installs each missing or older ID once', async () => {
+  const data = favoritesDocument([
+    extension('missing.ext', '2.0.0'), extension('MISSING.EXT'),
+    extension('older.ext', '2.0.0'), extension('equal.ext', '2.0.0'), extension('newer.ext', '2.0.0'),
+  ]);
+  const app = setup(data, {
+    profiles: [extension('OLDER.EXT', '3.0.0'), extension('kept.ext')],
+    installed: [extension('older.ext'), extension('equal.ext', '2.0.0'), extension('newer.ext', '3.0.0')],
+  });
+  await app.runImportFavorites();
+  assert.deepEqual(app.calls.installs, ['missing.ext@2.0.0', 'older.ext@2.0.0']);
+  assert.equal(app.calls.saves[0].length, 5);
+  assert.deepEqual(app.calls.saves[0][0], extension('OLDER.EXT', '3.0.0'));
+  assert.equal(app.calls.saves[0][1].id, 'kept.ext');
+});
+
+test('favorites rejects wrong formats and malformed entries without side effects', async () => {
+  for (const data of [null, document(), { ...favoritesDocument(), version: 2 },
+    { ...favoritesDocument(), type: 'profile' }, favoritesDocument([null]),
+    favoritesDocument([extension('a.b', 12)]), favoritesDocument([extension(' ')]),
+    favoritesDocument([{ ...extension('a.b'), name: null }])]) {
+    const app = setup(data);
+    await app.runImportFavorites();
+    assert.equal(app.calls.errors.length, 1);
+    assert.equal(app.calls.saves.length, 0);
+    assert.equal(app.calls.installs.length, 0);
+  }
+});
+
+test('favorites cancellation and deferred installation preserve user choice', async () => {
+  for (const option of ['cancelOpen', 'cancelImport']) {
+    const app = setup(favoritesDocument([extension('a.b')]), { [option]: true });
+    await app.runImportFavorites();
+    assert.equal(app.calls.saves.length, 0);
+    assert.equal(app.calls.installs.length, 0);
+  }
+  const app = setup(favoritesDocument([extension('a.b')]), { later: true });
+  await app.runImportFavorites();
+  assert.equal(app.calls.saves.length, 1);
+  assert.equal(app.calls.installs.length, 0);
+});
+
+test('favorites continues after installation failures and reports partial success', async () => {
+  const app = setup(favoritesDocument([extension('a.b'), extension('c.d')]), { failInstall: 'a.b@1.0.0' });
+  await app.runImportFavorites();
+  assert.equal(app.calls.installs.length, 2);
+  assert.equal(app.calls.warnings.length, 1);
+});
+
+test('favorites export handles empty lists, cancellation and write failures', async () => {
+  for (const options of [{ profiles: [] }, { cancelSave: true }, { failWrite: true }]) {
+    const app = setup(undefined, { profiles: [extension('a.b')], ...options });
+    await app.runExportFavorites();
+    assert.equal(app.calls.writes.length, 0);
+    assert.equal(app.calls.errors.length, options.failWrite ? 1 : 0);
+    if (options.failWrite) assert.equal(app.calls.messages.length, 0);
   }
 });

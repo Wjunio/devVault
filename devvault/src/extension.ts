@@ -7,6 +7,8 @@ import { showProfiles } from "./commands/showProfiles";
 import { manageProfiles } from "./commands/manageProfiles";
 import { exportProfile } from "./commands/exportProfile";
 import { importProfile } from "./commands/importProfile";
+import { exportFavorites } from "./commands/exportFavorites";
+import { importFavorites } from "./commands/importFavorites";
 import { FavoritesService } from "./services/favoritesService";
 import { ProfilesService } from "./services/profilesService";
 
@@ -17,6 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
   const profilesService = new ProfilesService(context.globalState);
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("devvault.exportFavorites", () => exportFavorites(favoritesService)),
+    vscode.commands.registerCommand("devvault.importFavorites", () => importFavorites(favoritesService)),
     vscode.commands.registerCommand(
       "devvault.listExtensions",
       () => listExtensions(),
