@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
 import type { FavoriteExtension } from "../models/FavoriteExtension";
-import type { Profile } from "../models/Profile";
-import type { DevVaultExport } from "../models/DevVaultExport";
 import type { ProfilesService } from "../services/profilesService";
+import { isDevVaultExport } from "../utils/isDevVaultExport";
 import { compareVersions } from "../utils/compareVersions";
 
 export async function importProfile(profilesService: ProfilesService): Promise<void> {
@@ -33,19 +32,13 @@ export async function importProfile(profilesService: ProfilesService): Promise<v
 
     const content = Buffer.from(data).toString("utf-8");
 
-    const imported: DevVaultExport = JSON.parse(content);
+    const imported: unknown = JSON.parse(content.replace(/^\uFEFF/, ""));
 
     // ----------------------------------------
     // 3. VALIDAR ARQUIVO
     // ----------------------------------------
 
-    if (
-      !imported ||
-      imported.version !== 1 ||
-      !imported.profile ||
-      !imported.profile.name ||
-      !Array.isArray(imported.profile.extensions)
-    ) {
+    if (!isDevVaultExport(imported)) {
       vscode.window.showErrorMessage(
         "❌ Este arquivo não é um perfil DevVault válido.",
       );
@@ -191,23 +184,38 @@ export async function importProfile(profilesService: ProfilesService): Promise<v
     let success = 0;
     let failed = 0;
 
-    for (const extension of extensionsToInstall) {
-      try {
-        await vscode.commands.executeCommand(
-          "workbench.extensions.installExtension",
-          `${extension.id}@${extension.version}`,
-        );
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: `DevVault: ${profile.name}`,
+        cancellable: false,
+      },
+      async (progress) => {
+        for (const extension of extensionsToInstall) {
+          progress.report({
+            message: `${success + failed + 1}/${extensionsToInstall.length}: ${extension.name}`,
+          });
 
-        success++;
-      } catch (error) {
-        console.error(
-          `Erro ao instalar ${extension.id}@${extension.version}`,
-          error,
-        );
-
-        failed++;
-      }
-    }
+          try {
+            await vscode.commands.executeCommand(
+              "workbench.extensions.installExtension",
+              `${extension.id}@${extension.version}`,
+            );
+    
+            success++;
+          } catch (error) {
+            console.error(
+              `Erro ao instalar ${extension.id}@${extension.version}`,
+              error,
+            );
+    
+            failed++;
+          } finally {
+            progress.report({ increment: 100 / extensionsToInstall.length });
+          }
+        }
+      },
+    );
 
     // ----------------------------------------
     // 9. RESULTADO

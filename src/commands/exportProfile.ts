@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import type { Profile } from "../models/Profile";
 import type { DevVaultExport } from "../models/DevVaultExport";
 import type { ProfilesService } from "../services/profilesService";
 
@@ -53,11 +52,18 @@ export async function exportProfile(profilesService: ProfilesService): Promise<v
     profile: selected.profile,
   };
 
-  const content = JSON.stringify(exportData, null, 2);
+  try {
+    const content = JSON.stringify(exportData, null, 2);
 
-  await vscode.workspace.fs.writeFile(uri, Buffer.from(content, "utf-8"));
+    await vscode.workspace.fs.writeFile(uri, Buffer.from(content, "utf-8"));
 
-  vscode.window.showInformationMessage(
-    `📤 Perfil "${selected.profile.name}" exportado com sucesso.`,
-  );
+    vscode.window.showInformationMessage(
+      `📤 Perfil "${selected.profile.name}" exportado com sucesso.`,
+    );
+  } catch (error) {
+    console.error("Erro ao exportar perfil DevVault:", error);
+    vscode.window.showErrorMessage(
+      "N\u00e3o foi poss\u00edvel exportar o perfil. Verifique o local escolhido e a permiss\u00e3o de escrita.",
+    );
+  }
 }
