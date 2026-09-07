@@ -1,14 +1,17 @@
 {
-  "name": "devvault",
-  "displayName": "DevVault",
-  "description": "Uma extensão do VS Code que salva suas extensões favoritas, mantém as versões, sincroniza pelo Google Drive e permite compartilhar ambientes com outras pessoas.",
+  "name": "devvault-manager",
+  "displayName": "DevVault Manager",
+  "description": "Salve extensões favoritas e perfis com suas versões e compartilhe essas listas por exportação e importação de arquivos JSON.",
+  "icon": "images/icon.png",
   "version": "0.0.1",
+  "publisher": "ArtePrime",
   "engines": {
     "vscode": "^1.136.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": ["extensions", "extension manager", "favorites", "favoritos", "profiles", "perfis", "import", "export", "json"],
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {

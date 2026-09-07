@@ -1,9 +1,17 @@
-# Change Log
+﻿# Histórico de alterações
 
-All notable changes to the "devvault" extension will be documented in this file.
+As alterações do DevVault Manager são registradas neste arquivo.
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## 0.0.1
 
-## [Unreleased]
+Primeira versão com gerenciamento local de favoritos e perfis de extensões.
 
-- Initial release
+- Listagem das extensões instaladas com suas versões.
+- Seleção e consulta de extensões favoritas.
+- Criação, consulta, edição e exclusão de perfis.
+- Exportação e importação de favoritos e perfis em JSON.
+- União de favoritos por identificador, mantendo a maior versão registrada.
+- Resumo e confirmação antes da importação.
+- Instalação de extensões ausentes e atualização de versões antigas, preservando versões iguais ou superiores às do arquivo.
+- Opção de adiar a instalação e indicação de falhas parciais.
+- Validação dos arquivos importados e tratamento de erros de exportação.

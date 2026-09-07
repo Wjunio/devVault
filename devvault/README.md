@@ -1,71 +1,89 @@
-# devvault README
+# DevVault Manager
 
-This is the README for your extension "devvault". After writing up a brief description, we recommend including the following sections.
+Salve suas extensões favoritas e organize conjuntos de extensões em perfis no VS Code. Exporte e importe arquivos JSON para compartilhar essas listas ou transferi-las entre ambientes.
 
-## Features
+O DevVault ajuda quem trabalha com diferentes projetos, prepara uma nova máquina ou compartilha uma seleção de ferramentas com a equipe. Cada favorito registra o identificador, o nome e a versão da extensão.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Instalação
 
-For example if there is an image subfolder under your extension project workspace:
+Quando a publicação estiver disponível no Marketplace, abra **Extensões** (`Ctrl+Shift+X`), procure por **DevVault Manager**, do publicador **ArtePrime**, e clique em **Instalar**.
 
-\!\[feature X\]\(images/feature-x.png\)
+Para instalar pelo arquivo VSIX:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. Abra a Paleta de Comandos.
+2. Execute `Extensions: Install from VSIX...`.
+3. Selecione o arquivo `devvault-manager-<versão>.vsix`.
+4. Procure por `DevVault` na Paleta de Comandos para começar.
 
-## Requirements
+A compatibilidade declarada no manifesto é VS Code `^1.136.0`.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## Funcionalidades
 
-## Extension Settings
+- Listar extensões instaladas e suas versões.
+- Gerenciar e consultar favoritos.
+- Criar, consultar e gerenciar perfis de extensões.
+- Exportar e importar favoritos e perfis com as versões registradas.
+- Instalar extensões ausentes ou atualizar versões antigas durante a importação, com opção de fazer isso depois.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Os dados são armazenados localmente pelo VS Code. A sincronização automática com o Google Drive ainda não está implementada.
 
-For example:
+## Como usar
 
-This extension contributes the following settings:
+Abra a Paleta de Comandos (`Ctrl+Shift+P` no Windows/Linux ou `Cmd+Shift+P` no macOS) e procure por `DevVault`.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Para compartilhar favoritos, execute **Gerenciar favoritos**, selecione as extensões e confirme. Depois use **Exportar favoritos** e envie o JSON gerado. No outro ambiente, use **Importar favoritos**, confira o resumo e escolha se deseja instalar as extensões agora.
 
-## Known Issues
+Para separar ferramentas por projeto, use **Criar perfil**, informe nome e descrição e selecione as extensões. Você pode editar ou excluir esse conjunto em **Gerenciar perfis** e compartilhá-lo com **Exportar perfil**.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+| Comando | Ação |
+| --- | --- |
+| DevVault: Listar extensões | Exibe as extensões instaladas. |
+| DevVault: Gerenciar favoritos | Seleciona as extensões favoritas. |
+| DevVault: Mostrar favoritos | Consulta os favoritos salvos. |
+| DevVault: Exportar favoritos | Salva os favoritos em um arquivo `.devvault.json`. |
+| DevVault: Importar favoritos | Adiciona favoritos de um arquivo à lista local. |
+| DevVault: Criar perfil | Salva um conjunto de extensões com nome e descrição. |
+| DevVault: Mostrar perfis | Consulta os perfis salvos. |
+| DevVault: Gerenciar perfis | Gerencia os perfis existentes. |
+| DevVault: Exportar perfil | Salva um perfil em um arquivo `.devvault.json`. |
+| DevVault: Importar perfil | Importa um perfil e oferece a instalação das extensões. |
 
-## Release Notes
+## Importação e versões
 
-Users appreciate release notes as you update your extension.
+A importação apresenta um resumo antes de salvar os dados. Você pode escolher instalar as extensões naquele momento ou deixar para depois.
 
-### 1.0.0
+| Situação da extensão | Ao escolher instalar |
+| --- | --- |
+| Não instalada | Instala a versão registrada no arquivo. |
+| Versão instalada menor | Atualiza para a versão do arquivo. |
+| Mesma versão | Mantém a instalação atual. |
+| Versão instalada maior | Mantém a versão maior, sem downgrade. |
 
-Initial release of ...
+Os favoritos importados são unidos aos existentes por identificador, mantendo a maior versão registrada. Ao importar um perfil com nome já existente, o DevVault solicita confirmação para substituí-lo.
 
-### 1.0.1
+A instalação depende de conexão à internet e da disponibilidade da versão solicitada. Os perfis do DevVault armazenam listas de extensões; não incluem configurações, atalhos ou arquivos do projeto.
 
-Fixed issue #.
+## Perguntas frequentes
 
-### 1.1.0
+### Importar favoritos substitui minha lista?
 
-Added features X, Y, and Z.
+Não. A importação combina as listas e mantém a maior versão registrada para cada identificador.
 
----
+### Importar um perfil remove extensões já instaladas?
 
-## Following extension guidelines
+Não. A importação oferece instalar as extensões ausentes e atualizar as antigas. Ela não remove extensões do ambiente.
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+### O JSON contém as extensões completas?
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+Não. Ele contém os nomes, identificadores e versões. A instalação das extensões é feita pelo VS Code, separadamente.
 
-## Working with Markdown
+### Uma instalação falhou. Perdi os favoritos ou o perfil?
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+Os dados são salvos antes da etapa de instalação. Se uma extensão falhar, o DevVault continua com as demais e informa o resultado. Você pode importar o arquivo novamente para tentar instalar as pendentes.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+## Limitações atuais
 
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- A sincronização automática com serviços de nuvem ainda não está disponível.
+- Os perfis não substituem os perfis nativos do VS Code nem fazem backup completo do ambiente.
+- O comparador atual considera as partes numéricas da versão; sufixos de pré-lançamento não têm ordenação SemVer completa.
+- O DevVault não instala uma versão inferior à que já está instalada, portanto importar uma lista não garante um ambiente idêntico ao de origem.
