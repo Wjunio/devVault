@@ -6,7 +6,20 @@ interface ExtensionQuickPickItem extends vscode.QuickPickItem {
 }
 
 export async function manageProfiles(profilesService: ProfilesService): Promise<void> {
-  const profiles = profilesService.getAll();
+  try {
+    await runManageProfiles(profilesService);
+  } catch (error) {
+    console.error("[DevVault] Falha ao gerenciar perfis:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    await vscode.window.showErrorMessage(
+      `DevVault: não foi possível gerenciar perfis. ${message}`,
+    );
+  }
+}
+
+async function runManageProfiles(profilesService: ProfilesService): Promise<void> {
+  // Keep edits local until the user finishes all steps and saves.
+  const profiles = profilesService.getAll().map((profile) => ({ ...profile }));
 
   if (profiles.length === 0) {
     vscode.window.showInformationMessage(

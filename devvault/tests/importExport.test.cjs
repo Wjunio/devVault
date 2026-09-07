@@ -22,6 +22,42 @@ function loadModule(relativePath, vscode) {
 }
 
 const extension = (id, version = '1.0.0') => ({ id, name: id, version });
+
+test('managing profiles reports rejected dialogs without an unhandled rejection', async () => {
+  const failure = new TypeError('undefined is not iterable');
+  const errors = [];
+  const logs = [];
+  const originalError = console.error;
+  console.error = (...args) => logs.push(args);
+  try {
+    const vscode = { window: {
+      showQuickPick: async () => { throw failure; },
+      showErrorMessage: async (message) => errors.push(message),
+    } };
+    const { manageProfiles } = loadModule('src/commands/manageProfiles.ts', vscode);
+    await manageProfiles({ getAll: () => [{ name: 'Original', description: '', extensions: [] }] });
+    assert.match(errors[0], /DevVault.*undefined is not iterable/);
+    assert.equal(logs[0][1], failure);
+  } finally {
+    console.error = originalError;
+  }
+});
+
+test('cancelling profile editing preserves the stored profile', async () => {
+  const profiles = [{ name: 'Original', description: 'Description', extensions: [] }];
+  let picks = 0;
+  let saves = 0;
+  const vscode = { window: {
+    showQuickPick: async (items) => ++picks <= 2 ? items[0] : undefined,
+    showInputBox: async () => 'Changed',
+  } };
+  const { manageProfiles } = loadModule('src/commands/manageProfiles.ts', vscode);
+  await manageProfiles({ getAll: () => profiles, save: async () => { saves++; } });
+  assert.equal(profiles[0].name, 'Original');
+  assert.equal(profiles[0].description, 'Description');
+  assert.equal(saves, 0);
+});
+
 const document = (extensions = []) => ({
   version: 1, profile: { name: 'Meu perfil', description: '', extensions },
 });
